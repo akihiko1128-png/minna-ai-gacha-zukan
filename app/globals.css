@@ -1,0 +1,72 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #f7f7f8; color: #171717; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+.header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.94); backdrop-filter: blur(12px); border-bottom: 1px solid #e7e7e7; }
+.header-inner { max-width: 1100px; margin: auto; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { font-weight: 900; font-size: 20px; letter-spacing: .02em; }
+.sub { color: #777; font-size: 12px; margin-top: 2px; }
+.admin-link { border: 1px solid #ddd; border-radius: 999px; padding: 8px 12px; background: #fff; font-size: 12px; }
+
+.container { max-width: 1100px; margin: auto; padding: 24px 16px 60px; }
+.hero { text-align: center; padding: 18px 0 24px; }
+.hero h1 { margin: 0; font-size: clamp(25px, 6vw, 42px); font-weight: 950; }
+.hero p { margin: 8px 0 0; color: #777; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (min-width: 700px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; } }
+
+.card { background: white; border: 1px solid #e8e8e8; border-radius: 18px; overflow: hidden; box-shadow: 0 5px 18px rgba(0,0,0,.045); transition: transform .15s ease, box-shadow .15s ease; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(0,0,0,.08); }
+.card button { width: 100%; border: 0; background: transparent; padding: 0; text-align: left; }
+.card-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: #eee; }
+.card-body { padding: 10px 12px 13px; }
+.no { font-size: 11px; color: #888; font-weight: 800; }
+.title { font-weight: 900; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.author { font-size: 11px; color: #777; margin-top: 3px; }
+
+.empty, .loading { padding: 60px 20px; text-align: center; color: #777; }
+
+.game-wrap { max-width: 600px; margin: auto; }
+.back { border: 0; background: transparent; color: #555; padding: 6px 0 16px; font-weight: 700; }
+.game { background: linear-gradient(180deg,#fff,#f2f2f4); border: 1px solid #e2e2e2; border-radius: 28px; padding: 22px 18px 28px; text-align: center; overflow: hidden; }
+.machine { position: relative; width: min(330px, 80vw); margin: 12px auto 10px; }
+.machine-body { position: relative; background: linear-gradient(145deg,#fafafa,#d8d8dc); border: 3px solid #222; border-radius: 30px 30px 24px 24px; padding: 16px 14px 26px; box-shadow: 0 14px 0 #aaa, 0 20px 32px rgba(0,0,0,.18); }
+.machine.shake .machine-body { animation: shake .6s ease; }
+.dome { height: 150px; border-radius: 48% 48% 25% 25%; background: radial-gradient(circle at 35% 25%,#fff 0 8%,#e8e8ea 9% 40%,#bfc0c5 75%); border: 3px solid #222; display: grid; place-items: center; overflow: hidden; }
+.logo { font-weight: 950; font-size: 18px; background: #fff; border: 2px solid #222; border-radius: 999px; padding: 8px 13px; }
+.slot { height: 36px; margin: 12px auto; width: 75%; border-radius: 8px; background: #252525; box-shadow: inset 0 2px 5px rgba(0,0,0,.6); }
+.tray { height: 56px; border: 3px solid #222; border-radius: 10px 10px 22px 22px; background: #e9e9ec; }
+.handle { margin: 16px auto 4px; width: 86px; height: 86px; border-radius: 50%; border: 5px solid #222; background: #f4f4f4; position: relative; }
+.handle:after { content:""; position:absolute; width: 14px; height: 42px; border-radius: 10px; background:#222; left:31px; top:16px; transform-origin: 7px 26px; }
+.game.turning .handle:after { animation: turn .8s ease; }
+.capsule { position: absolute; left: 50%; top: 270px; transform: translate(-50%,0) scale(.2); opacity: 0; width: 82px; height: 72px; border-radius: 50%; background: linear-gradient(#fff 0 49%,#cfcfd3 50%); border: 3px solid #222; z-index: 4; }
+.game.capsule .capsule { animation: pop .9s ease forwards; }
+.game.get .capsule { animation: popget 1s ease forwards; }
+.action { width: 100%; max-width: 300px; padding: 14px 20px; border: 0; border-radius: 999px; background: #171717; color: #fff; font-weight: 900; box-shadow: 0 5px 0 #000; }
+.action:disabled { opacity: .5; box-shadow: none; }
+.get-card { margin: 20px auto 4px; background:#fff; border-radius:22px; padding:18px; border:1px solid #ddd; }
+.get-card h2 { margin: 0 0 10px; font-size: 34px; }
+.get-image { width: 100%; max-width: 330px; aspect-ratio:1; object-fit:cover; border-radius:16px; display:block; margin:auto; }
+
+.admin { max-width: 900px; margin: auto; }
+.panel { background:#fff; border:1px solid #e3e3e3; border-radius:18px; padding:18px; margin-bottom:16px; }
+.panel h2 { margin:0 0 14px; font-size:18px; }
+.row { display:grid; grid-template-columns: 1fr; gap:10px; }
+@media (min-width:650px){ .row.two { grid-template-columns:1fr 1fr; } }
+.input, .file { width:100%; border:1px solid #d7d7d7; border-radius:12px; padding:12px; background:#fff; }
+.small { font-size:12px; color:#777; }
+.primary { border:0; border-radius:12px; padding:12px 16px; background:#171717; color:#fff; font-weight:900; }
+.danger { border:1px solid #e55; background:#fff; color:#b00; border-radius:10px; padding:8px 11px; font-weight:800; }
+.list { display:grid; gap:10px; }
+.item { display:grid; grid-template-columns:70px 1fr auto; gap:12px; align-items:center; padding:10px; border:1px solid #eee; border-radius:14px; }
+.thumb { width:70px; height:70px; object-fit:cover; border-radius:10px; background:#eee; }
+.item-title { font-weight:900; }
+.actions { display:flex; gap:6px; }
+.notice { padding:10px 12px; border-radius:10px; background:#f2f2f2; font-size:13px; margin-bottom:12px; }
+@keyframes shake { 0%,100%{transform:translateX(0) rotate(0)} 20%{transform:translateX(-8px) rotate(-2deg)} 40%{transform:translateX(8px) rotate(2deg)} 60%{transform:translateX(-7px) rotate(-2deg)} 80%{transform:translateX(7px) rotate(2deg)} }
+@keyframes turn { from{transform:rotate(0)} to{transform:rotate(180deg)} }
+@keyframes pop { 0%{opacity:0;transform:translate(-50%,0) scale(.2)} 35%{opacity:1} 100%{opacity:1;transform:translate(-50%,145px) scale(1)} }
+@keyframes popget { 0%{opacity:1;transform:translate(-50%,145px) scale(1)} 100%{opacity:0;transform:translate(-50%,220px) scale(.75)} }

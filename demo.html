@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>みんなのAIガチャ図鑑 デモ</title>
+<style>
+body{margin:0;background:#f7f7f8;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",Meiryo,sans-serif}
+header{padding:16px 18px;background:#fff;border-bottom:1px solid #ddd;font-weight:900}.wrap{max-width:1000px;margin:auto;padding:25px 16px}
+h1{text-align:center}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{background:#fff;border:1px solid #ddd;border-radius:18px;overflow:hidden}.card img{width:100%;aspect-ratio:1;object-fit:cover}.card button{border:0;background:0;width:100%;padding:0}.body{padding:10px;font-weight:900}
+.game{display:none;max-width:500px;margin:auto;text-align:center}.game.on{display:block}.machine{margin:30px auto;width:270px;height:390px;background:linear-gradient(#eee,#bbb);border:4px solid #222;border-radius:35px;padding:15px;box-sizing:border-box;box-shadow:0 14px 0 #888}.dome{height:150px;border:3px solid #222;border-radius:50% 50% 20% 20%;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#fff,#ccc)}.logo{background:#fff;border:2px solid #222;border-radius:50px;padding:10px;font-weight:900}.slot{height:30px;background:#222;margin:14px 20px}.tray{height:50px;border:3px solid #222;border-radius:10px}.handle{width:80px;height:80px;border:5px solid #222;border-radius:50%;margin:20px auto;position:relative}.handle:after{content:"";position:absolute;width:13px;height:40px;background:#222;left:31px;top:15px}.shake{animation:sh .55s}.spin:after{animation:sp .7s}.capsule{margin:-10px auto 20px;width:70px;height:60px;border:3px solid #222;border-radius:50%;background:linear-gradient(#fff 50%,#ccc 50%);opacity:0}.pop{animation:pop .8s forwards}.get{display:none}.get.on{display:block}.get img{max-width:300px;width:100%;border-radius:18px}@keyframes sh{50%{transform:translateX(8px) rotate(2deg)}}@keyframes sp{to{transform:rotate(180deg)}}@keyframes pop{to{opacity:1;transform:translateY(30px)}}
+</style></head><body>
+<header>🎁 みんなのAIガチャ図鑑</header>
+<div class="wrap"><div id="gallery"><h1>みんなのAIガチャ図鑑</h1><p style="text-align:center;color:#777">画像をタップしてガチャを回そう！</p><div class="grid" id="grid"></div></div>
+<div id="game" class="game"><button onclick="back()">← 図鑑に戻る</button><h1 id="gt"></h1><div class="machine" id="machine"><div class="dome"><div class="logo">AI GACHA</div></div><div class="slot"></div><div class="tray"></div><div class="handle" id="handle"></div></div><div class="capsule" id="cap"></div><p id="msg">ハンドルを回してね！</p><button id="go" onclick="play()">🎲 ガチャを回す！</button><div class="get" id="get"><h1>🎉 GET!</h1><img id="gi"><h2 id="gtt"></h2></div></div></div>
+<script>
+const items=[1,2,3,4,5,6,7,8].map((n)=>({n,title:"AIガチャ No."+n, img:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width="500" height="500" fill="#eeeef2"/><circle cx="250" cy="230" r="150" fill="white" stroke="#222" stroke-width="8"/><text x="250" y="245" text-anchor="middle" font-size="54" font-family="sans-serif" font-weight="900">AI</text><text x="250" y="390" text-anchor="middle" font-size="30" font-family="sans-serif">GACHA ${n}</text></svg>`)}));
+let cur=null; items.forEach(x=>grid.innerHTML+=`<div class="card"><button onclick="openG(${x.n})"><img src="${x.img}"><div class="body">NO.${x.n}<br>${x.title}</div></button></div>`);
+function openG(n){cur=items.find(x=>x.n===n);gallery.style.display="none";game.classList.add("on");gt.textContent="NO."+cur.n+" "+cur.title;get.classList.remove("on");go.style.display="inline-block";msg.textContent="ハンドルを回してね！";cap.className="capsule";machine.className="machine";handle.className="handle"}
+function play(){go.disabled=true;machine.classList.add("shake");handle.classList.add("spin");msg.textContent="ガチャガチャ……！";setTimeout(()=>cap.classList.add("pop"),550);setTimeout(()=>{get.classList.add("on");gi.src=cur.img;gtt.textContent=cur.title;go.style.display="none";msg.textContent="";},1500)}
+function back(){game.classList.remove("on");gallery.style.display="block"}
+</script></body></html>
