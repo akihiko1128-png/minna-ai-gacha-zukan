@@ -1,4 +1,4 @@
-name: Unpack project
+name: プロジェクトを展開する
 
 on:
   workflow_dispatch:
@@ -11,20 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Unpack ZIP
+      - name: ZIPファイルを解凍する
         run: |
-          unzip -o 'みんなのAIガチャ図鑑_完成版.zip' -d temp_project
+          unzip -o 'みんなのAIガチャ図鑑_変更版.zip' -d temp_project
           cp -a temp_project/. .
           rm -rf temp_project
-          rm -f 'みんなのAIガチャ図鑑_完成版.zip'
+          rm -f 'みんなのAIガチャ図鑑_変更版.zip'
 
-      - name: Commit files
+      - name: ファイルをコミット
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Add project source"
+          git commit -m "Apply latest modified version"
           git push
