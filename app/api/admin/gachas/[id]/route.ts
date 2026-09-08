@@ -3,43 +3,51 @@ import { isAdmin } from "../../../../../lib/admin-auth";
 import { supabaseAdmin } from "../../../../../lib/supabase-admin";
 import crypto from "crypto";
 
-function ext(name:string) {
+function ext(name: string) {
   const e = name.toLowerCase().split(".").pop() || "jpg";
-  return ["jpg","jpeg","png","webp","gif","avif"].includes(e) ? e : "jpg";
+  return ["jpg", "jpeg", "png", "webp", "gif", "avif"].includes(e) ? e : "jpg";
 }
 
-export async function PATCH(req:NextRequest, ctx:{params:Promise<{id:string}>}) {
-  if (!(await isAdmin())) return NextResponse.json({error:"Unauthorized"},{status:401});
-  const {id} = await ctx.params;
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
   const form = await req.formData();
-  const title = String(form.get("title") || "");
-  const author = String(form.get("author") || "");
-  const file = form.get("image");
-  const updates:any = {title,author,updated_at:new Date().toISOString()};
+  const title = String(form.get("title") || "").trim();
+  const author = String(form.get("author") || "").trim();
+  const author_x = String(form.get("author_x") || "").trim();
+  const image = form.get("image");
 
-  if (file instanceof File && file.size > 0) {
-    if (!file.type.startsWith("image/") || file.size > 10*1024*1024) return NextResponse.json({error:"画像は10MB以下で選択してください。"},{status:400});
-    const path = `${crypto.randomUUID()}.${ext(file.name)}`;
-    const upload = await supabaseAdmin.storage.from("gacha-images").upload(path, Buffer.from(await file.arrayBuffer()), {contentType:file.type,upsert:false});
-    if (upload.error) return NextResponse.json({error:upload.error.message},{status:500});
-    const pub = supabaseAdmin.storage.from("gacha-images").getPublicUrl(path).data.publicUrl;
-    const old = await supabaseAdmin.from("gachas").select("storage_path").eq("id",id).single();
-    if (old.data?.storage_path) await supabaseAdmin.storage.from("gacha-images").remove([old.data.storage_path]);
-    updates.image_url = pub;
-    updates.storage_path = path;
+  const { data: current, error: currentError } = await supabaseAdmin.from("gachas").select("*").eq("id", id).single();
+  if (currentError || !current) return NextResponse.json({ error: "対象が見つかりません。" }, { status: 404 });
+
+  const update: Record<string, string> = { title, author, author_x };
+  let newPath: string | null = null;
+  if (image instanceof File && image.size > 0) {
+    if (!image.type.startsWith("image/")) return NextResponse.json({ error: "画像ファイルを選択してください。" }, { status: 400 });
+    if (image.size > 10 * 1024 * 1024) return NextResponse.json({ error: "画像は10MB以下にしてください。" }, { status: 400 });
+    newPath = `${crypto.randomUUID()}.${ext(image.name)}`;
+    const upload = await supabaseAdmin.storage.from("gacha-images").upload(newPath, Buffer.from(await image.arrayBuffer()), { contentType: image.type, upsert: false });
+    if (upload.error) return NextResponse.json({ error: upload.error.message }, { status: 500 });
+    update.image_url = supabaseAdmin.storage.from("gacha-images").getPublicUrl(newPath).data.publicUrl;
+    update.storage_path = newPath;
   }
 
-  const {data,error} = await supabaseAdmin.from("gachas").update(updates).eq("id",id).select().single();
-  if(error) return NextResponse.json({error:error.message},{status:500});
-  return NextResponse.json({gacha:data});
+  const { data, error } = await supabaseAdmin.from("gachas").update(update).eq("id", id).select().single();
+  if (error) {
+    if (newPath) await supabaseAdmin.storage.from("gacha-images").remove([newPath]);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (newPath && current.storage_path) await supabaseAdmin.storage.from("gacha-images").remove([current.storage_path]);
+  return NextResponse.json({ gacha: data });
 }
 
-export async function DELETE(_req:NextRequest, ctx:{params:Promise<{id:string}>}) {
-  if (!(await isAdmin())) return NextResponse.json({error:"Unauthorized"},{status:401});
-  const {id} = await ctx.params;
-  const old = await supabaseAdmin.from("gachas").select("storage_path").eq("id",id).single();
-  if (old.data?.storage_path) await supabaseAdmin.storage.from("gacha-images").remove([old.data.storage_path]);
-  const {error} = await supabaseAdmin.from("gachas").delete().eq("id",id);
-  if(error) return NextResponse.json({error:error.message},{status:500});
-  return NextResponse.json({ok:true});
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
+  const { data: current, error: currentError } = await supabaseAdmin.from("gachas").select("storage_path").eq("id", id).single();
+  if (currentError || !current) return NextResponse.json({ error: "対象が見つかりません。" }, { status: 404 });
+  const { error } = await supabaseAdmin.from("gachas").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (current.storage_path) await supabaseAdmin.storage.from("gacha-images").remove([current.storage_path]);
+  return NextResponse.json({ ok: true });
 }

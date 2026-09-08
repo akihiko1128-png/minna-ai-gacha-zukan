@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("gachas")
-    .select("id,display_no,title,author,image_url")
+    .select("id,display_no,title,author,author_x,image_url")
     .order("display_no", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
