@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "../../../../lib/admin-auth";
 import { supabaseAdmin } from "../../../../lib/supabase-admin";
 import crypto from "crypto";
+import { getAppBySlug } from "../../../../lib/app-context";
 
 export const dynamic = "force-dynamic";
 
@@ -10,20 +11,26 @@ function ext(name: string) {
   return ["jpg", "jpeg", "png", "webp", "gif", "avif"].includes(e) ? e : "jpg";
 }
 
-async function nextNo() {
-  const { data } = await supabaseAdmin.from("gachas").select("display_no").order("display_no", { ascending: false }).limit(1).maybeSingle();
+async function nextNo(appId: string) {
+  const { data } = await supabaseAdmin.from("gachas").select("display_no").eq("app_id", appId).order("display_no", { ascending: false }).limit(1).maybeSingle();
   return (data?.display_no || 0) + 1;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { data, error } = await supabaseAdmin.from("gachas").select("*").order("display_no", { ascending: true });
+  const slug = new URL(req.url).searchParams.get("app") || "ai-gacha";
+  const app = await getAppBySlug(slug);
+  if (!app) return NextResponse.json({ error: "図鑑が見つかりません。" }, { status: 404 });
+  const { data, error } = await supabaseAdmin.from("gachas").select("*").eq("app_id", app.id).order("display_no", { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ gachas: data || [] });
 }
 
 export async function POST(req: NextRequest) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const slug = new URL(req.url).searchParams.get("app") || "ai-gacha";
+  const app = await getAppBySlug(slug);
+  if (!app) return NextResponse.json({ error: "図鑑が見つかりません。" }, { status: 404 });
   const form = await req.formData();
   const files = form.getAll("images").filter((v): v is File => v instanceof File && v.size > 0);
   const title = String(form.get("title") || "").trim();
@@ -40,8 +47,8 @@ export async function POST(req: NextRequest) {
     const upload = await supabaseAdmin.storage.from("gacha-images").upload(path, buf, { contentType: file.type, upsert: false });
     if (upload.error) return NextResponse.json({ error: upload.error.message }, { status: 500 });
     const pub = supabaseAdmin.storage.from("gacha-images").getPublicUrl(path).data.publicUrl;
-    const display_no = await nextNo();
-    const ins = await supabaseAdmin.from("gachas").insert({ display_no, title, author, author_x, image_url: pub, storage_path: path }).select().single();
+    const display_no = await nextNo(app.id);
+    const ins = await supabaseAdmin.from("gachas").insert({ app_id: app.id, display_no, title, author, author_x, image_url: pub, storage_path: path }).select().single();
     if (ins.error) return NextResponse.json({ error: ins.error.message }, { status: 500 });
     created.push(ins.data);
   }

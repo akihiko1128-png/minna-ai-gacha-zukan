@@ -14,7 +14,15 @@ type Gacha = {
 type SiteSettings = {
   title: string;
   subtitle: string;
+  description?: string;
+  logo_url?: string;
   background_url: string;
+  primary_color?: string;
+  item_name?: string;
+  item_name_plural?: string;
+  show_x_account?: boolean;
+  show_creator?: boolean;
+  show_number?: boolean;
 };
 
 const defaultSettings: SiteSettings = {
@@ -33,7 +41,7 @@ function xUrl(value: string) {
   return `https://x.com/${encodeURIComponent(v)}`;
 }
 
-export default function GachaGallery() {
+export default function GachaGallery({ slug = "ai-gacha" }: { slug?: string }) {
   const [items, setItems] = useState<Gacha[]>([]);
   const [settings, setSettings] =
     useState<SiteSettings>(defaultSettings);
@@ -43,8 +51,8 @@ export default function GachaGallery() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/gachas").then((r) => r.json()),
-      fetch("/api/settings").then((r) => r.json()),
+      fetch(`/api/gachas?app=${encodeURIComponent(slug)}`).then((r) => r.json()),
+      fetch(`/api/settings?app=${encodeURIComponent(slug)}`).then((r) => r.json()),
     ])
       .then(([gachas, site]) => {
         setItems(gachas.gachas || []);
@@ -69,9 +77,20 @@ export default function GachaGallery() {
       className="container site-page"
       style={pageStyle}
     >
-      <section className="hero">
+      <section
+        className="hero"
+        style={settings.primary_color ? { borderColor: settings.primary_color } : undefined}
+      >
+        {settings.logo_url && (
+          <img
+            src={settings.logo_url}
+            alt=""
+            style={{ maxWidth: "120px", maxHeight: "80px", objectFit: "contain", marginBottom: "10px" }}
+          />
+        )}
         <h1>{settings.title}</h1>
         <p>{settings.subtitle}</p>
+        {settings.description && <p className="small">{settings.description}</p>}
       </section>
 
       {loading ? (
@@ -115,21 +134,23 @@ export default function GachaGallery() {
                 />
 
                 <div className="card-body">
-                  <div className="no">
-                    NO.{g.display_no}
-                  </div>
+                  {settings.show_number !== false && (
+                    <div className="no">
+                      NO.{g.display_no}
+                    </div>
+                  )}
 
                   <div className="title">
                     {g.title || "無題の作品"}
                   </div>
 
-                  {g.author && (
+                  {settings.show_creator !== false && g.author && (
                     <div className="author">
                       作成者：{g.author}
                     </div>
                   )}
 
-                  {profileUrl && (
+                  {settings.show_x_account !== false && profileUrl && (
                     <a
                       className="x-link"
                       href={profileUrl}
@@ -238,15 +259,17 @@ export default function GachaGallery() {
                   "18px 4px 4px",
               }}
             >
-              <div
-                style={{
-                  fontSize: "14px",
-                  opacity: 0.65,
-                  marginBottom: "6px",
-                }}
-              >
-                NO.{selectedItem.display_no}
-              </div>
+              {settings.show_number !== false && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    opacity: 0.65,
+                    marginBottom: "6px",
+                  }}
+                >
+                  NO.{selectedItem.display_no}
+                </div>
+              )}
 
               <h2
                 style={{
@@ -260,7 +283,7 @@ export default function GachaGallery() {
                   "無題の作品"}
               </h2>
 
-              {selectedItem.author && (
+              {settings.show_creator !== false && selectedItem.author && (
                 <p
                   style={{
                     margin: "8px 0",
@@ -272,7 +295,7 @@ export default function GachaGallery() {
                 </p>
               )}
 
-              {selectedItem.author_x && (
+              {settings.show_x_account !== false && selectedItem.author_x && (
                 <p
                   style={{
                     margin: "8px 0",
@@ -284,7 +307,7 @@ export default function GachaGallery() {
                 </p>
               )}
 
-              {xUrl(
+              {settings.show_x_account !== false && xUrl(
                 selectedItem.author_x
               ) && (
                 <p
