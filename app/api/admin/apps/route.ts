@@ -16,10 +16,8 @@ export async function POST(req: NextRequest) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
   const name = String(body.name || "").trim();
-  const slug = normalizeSlug(String(body.slug || name));
+  const slug = normalizeSlug(String(body.slug || name)) || `app-${Date.now().toString(36)}`;
   if (!name) return NextResponse.json({ error: "図鑑名を入力してください。" }, { status: 400 });
-  if (!slug) return NextResponse.json({ error: "URL用ID（slug）を入力してください。" }, { status: 400 });
-
   const { data, error } = await supabaseAdmin.from("apps").insert({
     name,
     slug,
